@@ -1,10 +1,33 @@
 import React, {useState} from 'react';
 import {StyleSheet, ScrollView} from 'react-native';
 import {Text, Container, Form, Input, Item, H1, Button} from 'native-base';
+import shortid from 'shortid';
+import {addTodo} from '../action/list';
+import {connect} from 'react-redux';
+import propTypes from 'prop-types';
 
-const Add = props => {
+const Add = ({navigation, addTodo}) => {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
+
+  const handleSubmit = async () => {
+    try {
+      if (!title || !description) {
+        return alert('Add Both Fields');
+      }
+      const todoToAdd = {
+        id: shortid.generate(),
+        title: title,
+        description: description,
+        isDone: false,
+      };
+      addTodo(todoToAdd);
+      navigation.navigate('Home');
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   return (
     <Container style={styles.container}>
       <ScrollView contentContainerStyle={{flexGrow: 1}}>
@@ -14,17 +37,17 @@ const Add = props => {
             <Input
               placeholder="Add Todo Title"
               value={title}
-              onChangeText={() => {}}
+              onChangeText={text => setTitle(text)}
             />
           </Item>
           <Item rounded style={styles.formItem}>
             <Input
               placeholder="Add Todo Description"
               value={description}
-              onChangeText={() => {}}
+              onChangeText={text => setDescription(text)}
             />
           </Item>
-          <Button rounded block onPress={() => {}}>
+          <Button rounded block onPress={handleSubmit}>
             <Text>Add</Text>
           </Button>
         </Form>
@@ -33,7 +56,15 @@ const Add = props => {
   );
 };
 
-export default Add;
+const mapDispatchToProps = {
+  addTodo: data => addTodo(data),
+};
+
+Add.propTypes = {
+  addTodo: propTypes.func.isRequired,
+};
+
+export default connect(null, mapDispatchToProps)(Add);
 
 const styles = StyleSheet.create({
   container: {
